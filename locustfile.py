@@ -10,4 +10,4 @@ class TestUser(FastHttpUser):
 
     @task
     def service(self):
-        self.client.get("/load_test")
+        self.client.get("/test")

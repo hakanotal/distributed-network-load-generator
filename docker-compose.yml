@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+  cdl-server:
+    build: 
+      context: .
+      dockerfile: cdl-server.Dockerfile
+    ports:
+      - "8000:8000"
+
+  cdl-master:
+    build: 
+      context: .
+      dockerfile: cdl-worker.Dockerfile
+    volumes:
+      - ./locustfile.py:/mnt/locust/locustfile.py
+      - ./load.py:/mnt/locust/load.py
+    ports:
+      - "8089:8089"
+    command: -f /mnt/locust/locustfile.py,/mnt/locust/load.py --master -H http://cdl-server:8000 -L INFO
+    # command: -f /mnt/locust/locustfile.py --master --csv=loadresults/load -H http://cdl-server:8000 -L INFO
+
+  cdl-worker:
+    build: 
+      context: .
+      dockerfile: cdl-worker.Dockerfile
+    volumes:
+      - ./locustfile.py:/mnt/locust/locustfile.py
+    command: -f /mnt/locust/locustfile.py --worker --master-host cdl-master

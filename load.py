@@ -1,14 +1,15 @@
 from locust import LoadTestShape
 import numpy as np
 
-spawn_rate = 100
+spawn_rate = 10
 time_limit = 60
 
 
 class TestShape(LoadTestShape):
     
     def __init__(self):
-        self.dist = np.genfromtxt('results/dist.csv', delimiter=',')
+        # self.dist = np.genfromtxt('results/dist.csv', delimiter=',')
+        self.dist = np.arange(0, 60)
 
     def calculate_user(self, t):
         return self.dist[round(t)]

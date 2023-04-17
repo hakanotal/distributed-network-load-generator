@@ -6,12 +6,14 @@ from PyQt6.QtCore import Qt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 import numpy as np
+import shutil
+import os
 
 
 
 class MplCanvas(FigureCanvasQTAgg):
     
-    def __init__(self, parent=None, width=7, height=5, dpi=100):
+    def __init__(self, parent=None, width=8, height=6, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
         super(MplCanvas, self).__init__(fig)
@@ -24,6 +26,10 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('Distribution Generator')
         layout = QHBoxLayout()
 
+        ## Clear folder
+        shutil.rmtree('./results')
+        os.mkdir('./results')
+
         ## Canvas
         self.sc = MplCanvas(self)
         self.dist = 'normal'
@@ -35,6 +41,13 @@ class MainWindow(QMainWindow):
         ## Controls
         controls = QWidget()
         v_layout = QVBoxLayout()
+
+        # Number of distributions
+        self.countInput = QSpinBox()
+        self.countInput.setRange(1, 10)
+        self.countInput.setValue(1)
+        v_layout.addWidget(QLabel('Distribution Number:'))
+        v_layout.addWidget(self.countInput)
 
         # Button
         self.saveBtn = QPushButton("Save")
@@ -96,15 +109,17 @@ class MainWindow(QMainWindow):
         self.redraw()
     
     def save(self):
-        np.savetxt('results/dist.csv', self.results, delimiter=',')
-        self.sc.axes.get_figure().savefig('results/dist.png')
+        count = self.countInput.value()
+
+        np.savetxt('results/dist'+str(count)+'.csv', self.results, delimiter=',')
+        self.sc.axes.get_figure().savefig('results/dist'+str(count)+'.png')
         
-        dlg = QDialog(self)
-        message = QLabel('Results are saved to \'results/dist.csv\'')
-        dlg_layout = QVBoxLayout()
-        dlg_layout.addWidget(message)
-        dlg.setLayout(dlg_layout)
-        dlg.show()
+        # dlg = QDialog(self)
+        # message = QLabel('Results are saved to \'results/dist'+str(count)+'.csv\'')
+        # dlg_layout = QVBoxLayout()
+        # dlg_layout.addWidget(message)
+        # dlg.setLayout(dlg_layout)
+        # dlg.show()
 
     def calc_values(self, dist, mean, std):
         samples = 10000 
@@ -123,6 +138,12 @@ class MainWindow(QMainWindow):
         values = values[(values >= 0) & (values <= 60)]
 
         results,_ = np.histogram(values, bins=60)
+
+        # Smooth the data
+        w = 3
+        results = np.convolve(results, np.ones(w), 'valid') / w
+        results = np.interp(results, (results.min(), results.max()), (0, 100))
+
         return results
 
 

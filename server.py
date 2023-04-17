@@ -4,9 +4,9 @@ import uvicorn
 app = FastAPI()
 
 
-@app.get("/load_test")
+@app.get("/test")
 async def api_service():
-    return {"message": "test"}
+    return {"message": "ok"}
 
 
 if __name__ == "__main__":
