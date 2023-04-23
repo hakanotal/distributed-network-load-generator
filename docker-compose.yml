@@ -9,18 +9,23 @@ services:
       - "8000:8000"
 
   cdl-master:
+    depends_on:
+      - cdl-server
     build: 
       context: .
-      dockerfile: cdl-worker.Dockerfile
+      dockerfile: cdl-master.Dockerfile
     volumes:
-      - ./locustfile.py:/mnt/locust/locustfile.py
-      - ./load.py:/mnt/locust/load.py
+      - ./locustfile.py:/locustfile.py
+      - ./shape.py:/shape.py
+      - ./results:/results
     ports:
       - "8089:8089"
-    command: -f /mnt/locust/locustfile.py,/mnt/locust/load.py --master -H http://cdl-server:8000 -L INFO
+    command: -f /locustfile.py,/shape.py --master -H http://cdl-server:8000 -L INFO --run-time 60
     # command: -f /mnt/locust/locustfile.py --master --csv=loadresults/load -H http://cdl-server:8000 -L INFO
 
   cdl-worker:
+    depends_on:
+      - cdl-master
     build: 
       context: .
       dockerfile: cdl-worker.Dockerfile

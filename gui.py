@@ -44,7 +44,7 @@ class MainWindow(QMainWindow):
 
         # Number of distributions
         self.countInput = QSpinBox()
-        self.countInput.setRange(1, 10)
+        self.countInput.setRange(1, 5)
         self.countInput.setValue(1)
         v_layout.addWidget(QLabel('Distribution Number:'))
         v_layout.addWidget(self.countInput)
