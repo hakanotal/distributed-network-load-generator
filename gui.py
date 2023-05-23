@@ -10,7 +10,6 @@ import shutil
 import os
 
 
-
 class MplCanvas(FigureCanvasQTAgg):
     
     def __init__(self, parent=None, width=8, height=6, dpi=100):
@@ -113,6 +112,13 @@ class MainWindow(QMainWindow):
 
         np.savetxt('results/dist'+str(count)+'.csv', self.results, delimiter=',')
         self.sc.axes.get_figure().savefig('results/dist'+str(count)+'.png')
+
+        total_dist = np.zeros(60)
+        for i in range(count):
+            d = np.genfromtxt('results/dist'+str(i+1)+'.csv', delimiter=',')
+            total_dist = total_dist + d
+        
+        np.savetxt('results/dist.csv', total_dist, delimiter=',')
         
         # dlg = QDialog(self)
         # message = QLabel('Results are saved to \'results/dist'+str(count)+'.csv\'')
@@ -142,6 +148,7 @@ class MainWindow(QMainWindow):
         # Smooth the data
         w = 3
         results = np.convolve(results, np.ones(w), 'valid') / w
+        results = np.append(np.zeros(w-1), results)
         results = np.interp(results, (results.min(), results.max()), (0, 100))
 
         return results
